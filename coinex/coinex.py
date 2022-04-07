@@ -3,15 +3,18 @@ import time
 import requests
 import collections
 
+_headers = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Accept': 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+}
+
+
 class CoinExApiError(Exception):
     pass
 
+
 class CoinEx:
-    _headers = {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
-        }
 
     def __init__(self, access_id=None, secret=None):
         self._access_id = access_id
@@ -51,10 +54,11 @@ class CoinEx:
         return self._v1('margin/market')
 
     def margin_transfer(self, from_account, to_account, coin_type, amount):
-        return self._v1('margin/transfer', method='post', auth=True, from_account=from_account, to_account=to_account, coin_type=coin_type, amount=amount)
+        return self._v1('margin/transfer', method='post', auth=True, from_account=from_account, to_account=to_account,
+                        coin_type=coin_type, amount=amount)
 
-    def margin_account(self, **params):
-        return self._v1('margin/account', auth=True, **params)
+    def margin_account(self, market, **params):
+        return self._v1('margin/account', auth=True, market=market, **params)
 
     def margin_config(self, **params):
         return self._v1('margin/config', auth=True, **params)
@@ -66,13 +70,15 @@ class CoinEx:
         return self._v1('margin/loan', method='post', auth=True, market=market, coin_type=coin_type, amount=amount)
 
     def margin_flat(self, market, coin_type, amount, **params):
-        return self._v1('margin/flat', method='post', auth=True, market=market, coin_type=coin_type, amount=amount, **params)
+        return self._v1('margin/flat', method='post', auth=True, market=market, coin_type=coin_type, amount=amount,
+                        **params)
 
     def future_market(self):
         return self._v1('future/market')
 
     def future_transfer(self, from_account, to_account, coin_type, amount):
-        return self._v1('future/transfer', method='post', auth=True, from_account=from_account, to_account=to_account, coin_type=coin_type, amount=amount)
+        return self._v1('future/transfer', method='post', auth=True, from_account=from_account, to_account=to_account,
+                        coin_type=coin_type, amount=amount)
 
     def future_account(self, **params):
         return self._v1('future/account', auth=True, **params)
@@ -87,10 +93,12 @@ class CoinEx:
         return self._v1('future/loan/history', auth=True, account_id=account_id, **params)
 
     def future_loan(self, account_id, coin_type, amount):
-        return self._v1('future/loan', method='post', auth=True, account_id=account_id, coin_type=coin_type, amount=amount)
+        return self._v1('future/loan', method='post', auth=True, account_id=account_id, coin_type=coin_type,
+                        amount=amount)
 
     def future_flat(self, account_id, coin_type, amount, **params):
-        return self._v1('future/flat', method='post', auth=True, account_id=account_id, coin_type=coin_type, amount=amount, **params)
+        return self._v1('future/flat', method='post', auth=True, account_id=account_id, coin_type=coin_type,
+                        amount=amount, **params)
 
     def option_market(self):
         return self._v1('option/market')
@@ -111,10 +119,13 @@ class CoinEx:
         return self._v1('balance/coin/withdraw', auth=True, **params)
 
     def balance_coin_withdraw(self, coin_type, coin_address, actual_amount, transfer_method, **params):
-        return self._v1('balance/coin/withdraw', method='post', auth=True, coin_type=coin_type, coin_address=coin_address, actual_amount=actual_amount, transfer_method=transfer_method, **params)
+        return self._v1('balance/coin/withdraw', method='post', auth=True, coin_type=coin_type,
+                        coin_address=coin_address, actual_amount=actual_amount, transfer_method=transfer_method,
+                        **params)
 
     def balance_coin_withdraw_cancel(self, coin_withdraw_id, **params):
-        return self._v1('balance/coin/withdraw', method='delete', auth=True, coin_withdraw_id=coin_withdraw_id, **params)
+        return self._v1('balance/coin/withdraw', method='delete', auth=True, coin_withdraw_id=coin_withdraw_id,
+                        **params)
 
     def balance_coin_deposit_list(self, **params):
         return self._v1('balance/coin/deposit', auth=True, **params)
@@ -129,13 +140,15 @@ class CoinEx:
         return self._v1('sub_account/transfer', auth=True, coin_type=coin_type, amount=amount, **params)
 
     def order_limit(self, market, type, amount, price, **params):
-        return self._v1('order/limit', method='post', auth=True, market=market, type=type, amount=amount, price=price, **params)
+        return self._v1('order/limit', method='post', auth=True, market=market, type=type, amount=amount, price=price,
+                        **params)
 
     def order_market(self, market, type, amount, **params):
         return self._v1('order/market', method='post', auth=True, market=market, type=type, amount=amount, **params)
 
     def order_ioc(self, market, type, amount, price, **params):
-        return self._v1('order/ioc', method='post', auth=True, market=market, type=type, amount=amount, price=price, **params)
+        return self._v1('order/ioc', method='post', auth=True, market=market, type=type, amount=amount, price=price,
+                        **params)
 
     def order_pending(self, market, page=1, limit=100):
         return self._v1('order/pending', method='get', auth=True, market=market, page=page, limit=limit)
@@ -162,7 +175,7 @@ class CoinEx:
         return self._v1('order/mining/difficulty', method='get', auth=True)
 
     def _v1(self, path, method='get', auth=False, **params):
-        headers = dict(self._headers)
+        headers = dict(_headers)
 
         if auth:
             if not self._access_id or not self._secret:
