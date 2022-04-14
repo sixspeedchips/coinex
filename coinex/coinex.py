@@ -1,13 +1,18 @@
+import decimal
 import hashlib
+import json
 import time
 import requests
 import collections
+import re
 
 _headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Accept': 'application/json',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
 }
+
+dr = re.compile(r"\"(\d+\.?\d+)\"")
 
 
 class CoinExApiError(Exception):
@@ -200,10 +205,12 @@ class CoinEx:
     def _process_response(self, resp):
         resp.raise_for_status()
 
-        data = resp.json()
-        if data['code'] is not 0:
-            raise CoinExApiError(data['message'])
+        data = resp.text
+        data = dr.sub(r'\1', data)
+        data = json.loads(data, parse_float=float)
 
+        if data['code'] != 0:
+            raise CoinExApiError(data['message'])
         return data['data']
 
     def _sign(self, params):
